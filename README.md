@@ -1,2 +1,3 @@
-# gametoy
+# GameToy
+
 GameToy Primitive
