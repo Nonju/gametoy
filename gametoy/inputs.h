@@ -11,7 +11,7 @@
 /*#define POT_PIN 2*/
 /*#endif*/
 
-#define BTN_PIN 2   // Was 5
+#define BTN_PIN_A 2 // Was 5
 #define BTN_PIN_B 1 // Was 4
 #define POT_PIN 4   // Was 2
 
@@ -23,7 +23,9 @@ void inputs_setup();
 void inputs_updateBefore();
 void inputs_updateAfter();
 
-int inputs_btnPressed();
+int inputs_btnPressed_A();
+int inputs_btnPressed_B();
+
 /*int inputs_btnLongPressed();*/ // Implement when needed
 /*int inputs_btnReleased();*/    // Implement when needed
 

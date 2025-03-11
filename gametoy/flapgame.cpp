@@ -21,7 +21,7 @@ void flap_init() {}
 void flap_update(MenuState *menuState) {
   int curTime = millis();
 
-  if (inputs_btnPressed()) {
+  if (inputs_btnPressed_A()) {
     if (flap_playerVelocity < 0) {
       flap_playerVelocity = FLAP_PLAYER_JUMP_VELOCITY;
     } else {

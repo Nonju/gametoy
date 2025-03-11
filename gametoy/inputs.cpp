@@ -1,12 +1,17 @@
 #include "inputs.h"
 
-int btnState, lastBtnState;
+int btnAState, lastBtnAState; // A
+int btnBState, lastBtnBState; // B
 int scrollState, lastScrollState;
 
-void inputs_setup() { pinMode(BTN_PIN, INPUT_PULLUP); };
+void inputs_setup() {
+  pinMode(BTN_PIN_A, INPUT_PULLUP);
+  pinMode(BTN_PIN_B, INPUT_PULLUP);
+};
 
 void inputs_updateBefore() {
-  btnState = digitalRead(BTN_PIN);
+  btnAState = digitalRead(BTN_PIN_A);
+  btnBState = digitalRead(BTN_PIN_B);
 
   // Try to filter out some jitter
   int newScrollState = analogRead(POT_PIN);
@@ -17,12 +22,17 @@ void inputs_updateBefore() {
 }
 
 void inputs_updateAfter() {
-  lastBtnState = btnState;
+  lastBtnAState = btnAState;
+  lastBtnBState = btnBState;
   lastScrollState = scrollState;
 }
 
-int inputs_btnPressed() {
-  return (btnState == LOW && btnState != lastBtnState) ? 1 : 0;
+int inputs_btnPressed_A() {
+  return (btnAState == LOW && btnAState != lastBtnAState) ? 1 : 0;
+}
+
+int inputs_btnPressed_B() {
+  return (btnBState == LOW && btnBState != lastBtnBState) ? 1 : 0;
 }
 
 // FIXME - Improve jitter-handling

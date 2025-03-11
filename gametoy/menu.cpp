@@ -14,7 +14,7 @@ void menu_update(MenuState *menuState) {
     selectedItem = inputs_scrollGetMappedState(0, 2);
   }
 
-  if (inputs_btnPressed()) {
+  if (inputs_btnPressed_A()) {
     // FIXME - Chose state corresponding to `selectedItem`
     if (selectedItem == 0) {
       *menuState = SPACEMETEORGAME;

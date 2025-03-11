@@ -51,7 +51,7 @@ void _smg_update_game() {
         SMG_HUD_SAFE_AREA, SCREEN_HEIGHT - smg_player.height);
   }
 
-  if (inputs_btnPressed()) {
+  if (inputs_btnPressed_A()) {
     Serial.println("ATTEMPTING TO SHOOT");
     _smg_spawnMissile();
   }
@@ -143,7 +143,7 @@ void _smg_update_game() {
 }
 
 void _smg_update_end(MenuState *menuState) {
-  if (inputs_btnPressed()) {
+  if (inputs_btnPressed_A()) {
     smg_init(); // Reset game before returning
     *menuState = MENU;
   }
