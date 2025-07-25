@@ -12,12 +12,15 @@
  *    - Flappy bird like game
  *    - Scroll controls approach speed of walls
  *  - Air hockey
- *      - Simple opponent "AI" ( or locally hosted game :^) )
+ *    - Simple opponent "AI" ( or locally hosted game :^) )
+ *  - Doodle jump
+ *    - Vertical climbing game
  *  - Main menu
  *    - [x] Center
  *    - [x] Start program here
  *    - Show latest score
  *    - Highscore-page (if has storage)
+ *    - Scroll inversion setting (if has storage)
  *  - [x] Add filter for analog input (try to fix jitter)
  *  - [NEW GAME] Space invaders
  *  - [NEW GAME] Missle command-like game
