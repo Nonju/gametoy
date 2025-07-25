@@ -1,10 +1,11 @@
 #include "flapgame.h"
+#include "definitions.h"
 #include "display.h"
 #include "inputs.h"
 
 extern Adafruit_SSD1306 display;
 
-Game flap_game = {1, 0, 1};
+Game flap_game = {1, 0, 3};
 GameObject flap_player = {FLAP_PLAYER_X,
                           SCREEN_HEIGHT / 2,
                           FLAP_PLAYER_WIDTH,
@@ -17,11 +18,36 @@ FlapWallPair *flap_lastWall = nullptr;
 
 int flap_timeSinceLastGravUpdate = 0;
 
-void flap_init() {}
+void flap_init() {
+  Serial.println("FLAP - Running init");
+
+  flap_lastWall = nullptr;
+  for (int i = 0; i < FLAP_WALL_MAX_AMOUNT; i++) {
+    flap_walls[i].top.alive = 0;
+    flap_walls[i].bottom.alive = 0;
+  }
+
+  flap_game.health = 3;
+  flap_game.score = 0;
+  flap_game.started = 1;
+}
 
 void flap_update(MenuState *menuState) {
-  int curTime = millis();
+  if (flap_game.started == 1) {
+    _flap_update_game();
+  } else {
+    _flap_update_end(menuState);
+  }
+}
 
+int first = 1; // FIXME - Remove this
+void _flap_update_game() {
+  if (first == 1) {
+    flap_init();
+    first = 0;
+  }
+
+  int curTime = millis();
   if (inputs_btnPressed_A()) {
     if (flap_playerVelocity < 0) {
       flap_playerVelocity = FLAP_PLAYER_JUMP_VELOCITY;
@@ -49,8 +75,8 @@ void flap_update(MenuState *menuState) {
 
   // Move player
   flap_player.y -= flap_playerVelocity;
-  if (flap_player.y < 0) {
-    flap_player.y = 0;
+  if (flap_player.y < FLAP_HUD_SAFE_AREA) {
+    flap_player.y = FLAP_HUD_SAFE_AREA;
   } else if (flap_player.y > (SCREEN_HEIGHT - flap_player.height)) {
     flap_player.y = (SCREEN_HEIGHT - flap_player.height);
   }
@@ -72,31 +98,78 @@ void flap_update(MenuState *menuState) {
     curWall->top.x -= currentWallSpeed;
     curWall->bottom.x -= currentWallSpeed;
 
-    if ((curWall->top.x + curWall->top.width) <= 0) {
+    if (_flap_isColliding(flap_player, curWall->top) ||
+        _flap_isColliding(flap_player, curWall->bottom)) {
       curWall->top.alive = 0;
+      flap_game.health = flap_game.health - 1;
+    } else if ((curWall->top.x + curWall->top.width) <= 0) {
+      curWall->top.alive = 0;
+      flap_game.score++;
     }
   }
 
+  // Loss check
+  if (flap_game.health <= 0) {
+    Serial.println("Player is DEAD");
+    flap_game.started = 0;
+  }
+
+  // NOTE - DEV
+  if (inputs_btnPressed_B()) {
+    int x = random(SCREEN_WIDTH * 0.1, SCREEN_WIDTH);
+    _flap_spawnWall(x);
+  }
+}
+
+void _flap_update_end(MenuState *menuState) {
+  if (inputs_btnPressed_A()) {
+    flap_init(); // Reset game before returning
+    *menuState = MENU;
+  }
 }
 
 void flap_render() {
+  if (flap_game.started == 1) {
+    /// Player
+    display.drawRect(flap_player.x, flap_player.y, flap_player.width,
+                     flap_player.height, SSD1306_WHITE);
 
-  /// Player
-  display.drawRect(flap_player.x, flap_player.y, flap_player.width,
-                   flap_player.height, SSD1306_WHITE);
-
-  /// Walls
-  FlapWallPair *curWall;
-  for (int i = 0; i < FLAP_WALL_MAX_AMOUNT; i++) {
-    curWall = &flap_walls[i];
-    if (!_flap_wallIsAlive(curWall)) {
-      continue;
+    /// Walls
+    FlapWallPair *curWall;
+    for (int i = 0; i < FLAP_WALL_MAX_AMOUNT; i++) {
+      curWall = &flap_walls[i];
+      if (!_flap_wallIsAlive(curWall)) {
+        continue;
+      }
+      display.drawRect(curWall->top.x, curWall->top.y, curWall->top.width,
+                       curWall->top.height, SSD1306_WHITE);
+      display.drawRect(curWall->bottom.x, curWall->bottom.y,
+                       curWall->bottom.width, curWall->bottom.height,
+                       SSD1306_WHITE);
     }
-    display.drawRect(curWall->top.x, curWall->top.y, curWall->top.width,
-                     curWall->top.height, SSD1306_WHITE);
-    display.drawRect(curWall->bottom.x, curWall->bottom.y,
-                     curWall->bottom.width, curWall->bottom.height,
-                     SSD1306_WHITE);
+
+    /// HUD
+    // score
+    display.setCursor(5, 2);
+    display.print("score: ");
+    display.println(flap_game.score);
+
+    // hp
+    display.setCursor(SCREEN_WIDTH * 0.65, 2);
+    display.cp437(true);
+    display.print("hp: ");
+    for (int i = 0; i < flap_game.health; i++) {
+      display.write(3); // Heart char
+    }
+    display.println();
+  } else {
+    display.setTextSize(1);              // Normal 1:1 pixel scale
+    display.setTextColor(SSD1306_WHITE); // Draw white text
+    display.setCursor(0, 0);             // Start at top-left corner
+    display.println("Game Over!");
+    display.setCursor(0, 20);
+    display.print("score: ");
+    display.println(flap_game.score);
   }
 }
 
@@ -130,7 +203,7 @@ void _flap_spawnWall(int xOverride) {
   // Top wall
   freeWallPair->top.alive = 1;
   freeWallPair->top.x = x;
-  freeWallPair->top.y = 0;
+  freeWallPair->top.y = FLAP_HUD_SAFE_AREA;
   freeWallPair->top.width = FLAP_WALL_WIDTH;
   freeWallPair->top.height = hTop;
 
@@ -153,4 +226,19 @@ int _flap_getWallSpeed() {
   /*return inputs_scrollGetMappedState(FLAP_WALL_MIN_SPEED,
    * FLAP_WALL_MAX_SPEED);*/
   return inputs_scrollGetMappedState(FLAP_WALL_MAX_SPEED, FLAP_WALL_MIN_SPEED);
+}
+
+// FIXME - straight copy of the function in the "spacemeteorgame"
+// TODO -> Replace both with a generic collision-checker-util
+// https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+int _flap_isColliding(GameObject o1, GameObject o2) {
+  if (o1.alive == 0 || o2.alive == 0) {
+    return 0;
+  }
+
+  if (o1.x < o2.x + o2.width && o1.x + o1.width > o2.x &&
+      o1.y < o2.y + o2.height && o1.y + o1.height > o2.y) {
+    return 1;
+  }
+  return 0;
 }

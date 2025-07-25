@@ -5,6 +5,9 @@
 #include <Adafruit_SSD1306.h>
 #include <Arduino.h>
 
+/// HUD
+#define FLAP_HUD_SAFE_AREA (SCREEN_HEIGHT * 0.2)
+
 /// PLAYER
 #define FLAP_PLAYER_WIDTH 4
 #define FLAP_PLAYER_HEIGHT 3
@@ -17,11 +20,11 @@
 /// WALL
 #define FLAP_WALL_MAX_AMOUNT 5
 #define FLAP_WALL_WIDTH SCREEN_WIDTH * 0.1
-#define FLAP_WALL_MIN_GAP SCREEN_HEIGHT * 0.4
-#define FLAP_WALL_MAX_GAP SCREEN_HEIGHT * 0.6
+#define FLAP_WALL_MIN_GAP SCREEN_HEIGHT * 0.55
+#define FLAP_WALL_MAX_GAP SCREEN_HEIGHT * 0.7
 #define FLAP_WALL_MIN_SPEED 2
 #define FLAP_WALL_MAX_SPEED 7
-#define FLAP_WALL_SPAWN_PADDING SCREEN_WIDTH * 0.5
+#define FLAP_WALL_SPAWN_PADDING SCREEN_WIDTH * 0.4
 
 typedef struct {
   GameObject top;
@@ -32,9 +35,13 @@ void flap_init();
 void flap_update(MenuState *menuState);
 void flap_render();
 
+void _flap_update_game();
+void _flap_update_end(MenuState *menuState);
 void _flap_spawnWall();
 void _flap_spawnWall(int xOverride);
 int _flap_wallIsAlive(FlapWallPair *wall);
 int _flap_getWallSpeed();
+
+int _flap_isColliding(GameObject o1, GameObject o2);
 
 #endif
