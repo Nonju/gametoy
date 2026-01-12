@@ -20,7 +20,7 @@ GameObject flap_player = {FLAP_PLAYER_X,
                           FLAP_PLAYER_HEIGHT,
                           0,
                           1};
-int flap_playerVelocity = FLAP_PLAYER_GRAVITY; // Should this be 0?
+double flap_playerVelocity = FLAP_PLAYER_GRAVITY; // Should this be 0?
 FlapWallPair flap_walls[FLAP_WALL_MAX_AMOUNT];
 FlapWallPair *flap_lastWall = nullptr;
 
