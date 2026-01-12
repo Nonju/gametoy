@@ -64,11 +64,15 @@ void setup() {
 
   // put your setup code here, to run once:
   Serial.begin(115200);
-  Serial.println("Hello, ESP32-S3!");
+  // Serial.println("Hello, ESP32-S3!");
 
   #ifndef BOARD_TYPE
     Serial.println("No board type specified!");
     for(;;); // Don't proceed, loop forever
+  #elif BOARD_TYPE == BOARD_ESP32S3
+    Serial.println("Hello, ESP32-S3!");
+  #elif BOARD_TYPE == BOARD_ESP32C3
+    Serial.println("Hello, ESP32-C3!");
   #endif
 
   if (!Wire.begin(I2C_SDA, I2C_SCL)) {
