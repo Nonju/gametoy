@@ -1,9 +1,18 @@
 #include "spacemeteorgame.h"
 #include "definitions.h"
 #include "display.h"
+#include "flapgame.h"
 #include "inputs.h"
+#include "screenstack.h"
 
 extern Adafruit_SSD1306 display;
+
+static GameCycle smg_cycle = {
+    "Meteor game", // Name
+    smg_init,      // Init
+    smg_update,    // Update
+    smg_render     // Render
+};
 
 Game smg_game = {1, 0, 3};
 GameObject smg_player = {SMG_PLAYER_X,
@@ -20,6 +29,8 @@ int smg_timeSinceLastMeteorMove = 0;
 int smg_timeSinceLastMeteorSpawn = 0;
 int smg_meteorSpawnTimeout = SMG_METEOR_SPAWN_TIME;
 
+GameCycle *smg_getCycle() { return &smg_cycle; }
+
 void smg_init() {
 
   smg_game.started = 1;
@@ -35,11 +46,11 @@ void smg_init() {
   }
 }
 
-void smg_update(MenuState *menuState) {
+void smg_update() {
   if (smg_game.started == 1) { // Active game
     _smg_update_game();
   } else { // End-game screen
-    _smg_update_end(menuState);
+    _smg_update_end();
   }
 }
 
@@ -142,10 +153,12 @@ void _smg_update_game() {
   }
 }
 
-void _smg_update_end(MenuState *menuState) {
+void _smg_update_end() {
   if (inputs_btnPressed_A()) {
+    // REVIEW - Not sure this is required now that
+    //          screenstack_push also calls init
     smg_init(); // Reset game before returning
-    *menuState = MENU;
+    screenstack_pop();
   }
 }
 

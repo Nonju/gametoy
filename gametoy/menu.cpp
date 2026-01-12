@@ -1,11 +1,24 @@
 #include "menu.h"
 #include "definitions.h"
+#include "flapgame.h"
 #include "inputs.h"
+#include "screenstack.h"
+#include "spacemeteorgame.h"
 
 extern Adafruit_SSD1306 display;
+
+static GameCycle menu_cycle = {
+    "Menu",      // Name
+    nullptr,     // Init
+    menu_update, // Update
+    menu_render, // Render
+};
+
 int selectedItem = 0;
 
-void menu_update(MenuState *menuState) {
+GameCycle *menu_getCycle() { return &menu_cycle; }
+
+void menu_update() {
   if (inputs_scrollHasUpdated() == 1) {
     /*Serial.print("SCROLL HAS UPDATED: ");*/
     /*Serial.print(inputs_scrollGetMappedState());*/
@@ -15,13 +28,11 @@ void menu_update(MenuState *menuState) {
   }
 
   if (inputs_btnPressed_A()) {
-    // FIXME - Chose state corresponding to `selectedItem`
+
     if (selectedItem == 0) {
-      *menuState = SPACEMETEORGAME;
+      screenstack_push(smg_getCycle());
     } else if (selectedItem == 1) {
-      *menuState = FLAPGAME;
-    } else {
-      *menuState = MENU;
+      screenstack_push(flap_getCycle());
     }
   }
 }
@@ -36,7 +47,9 @@ void menu_render() {
   display.setTextColor(SSD1306_WHITE); // Draw white text
 
   _addMenuItem("-Select game-", 25, 5, -1);
-  _addMenuItem("Meteor game", 10, 25, 0);
-  _addMenuItem("Flap game", 10, 40, 1);
+  // _addMenuItem("Meteor game", 10, 25, 0);
+  // _addMenuItem("Flap game", 10, 40, 1);
+  _addMenuItem(smg_getCycle()->name, 10, 25, 0);
+  _addMenuItem(flap_getCycle()->name, 10, 40, 1);
   _addMenuItem("Highscores", 10, 55, 2);
 }

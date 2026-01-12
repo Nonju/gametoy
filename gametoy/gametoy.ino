@@ -53,12 +53,11 @@
 #include "definitions.h"
 #include "inputs.h"
 #include "menu.h"
+#include "screenstack.h"
 #include "spacemeteorgame.h"
 #include "flapgame.h"
 
 extern Adafruit_SSD1306 display;
-
-enum MenuState menuState = MENU;
 
 void setup() {
   randomSeed(analogRead((RNDPIN)));
@@ -76,9 +75,10 @@ void setup() {
     Serial.println("Failed to initialize I2C");
     for(;;); // Don't proceed, loop forever
   }
-
   display_setup();
   inputs_setup();
+
+  screenstack_setup();
 
   Serial.println("Setup COMPLETE!");
 }
@@ -90,23 +90,10 @@ void loop() {
   /// Read
   inputs_updateBefore();
 
-  /// "Logic" / Update
-  switch (menuState) {
-    case MENU:
-      menu_update(&menuState);
-      break;
-    case HIGHSCORE:
-      // TODO
-      break;
-    case SPACEMETEORGAME:
-      smg_update(&menuState);
-      break;
-    case FLAPGAME:
-      flap_update(&menuState);
-      break;
-  }
-  inputs_updateAfter();
+  // Update top/current screen
+  screenstack_updateTop();
 
+  inputs_updateAfter();
 
   /// Render
   display.clearDisplay();
@@ -173,20 +160,9 @@ void loop() {
 
   #endif
 
-  switch (menuState) {
-    case MENU:
-      menu_render();
-      break;
-    case HIGHSCORE:
-      // TODO
-      break;
-    case SPACEMETEORGAME:
-      smg_render();
-      break;
-    case FLAPGAME:
-      flap_render();
-      break;
-  }
+  // Render top/current screen
+  screenstack_renderTop();
+
   display.display();
 
 }

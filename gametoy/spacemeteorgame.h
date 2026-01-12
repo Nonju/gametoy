@@ -31,12 +31,14 @@
 #define SMG_METEOR_MIN_HEIGHT 2
 #define SMG_METEOR_MAX_HEIGHT 5
 
+GameCycle *smg_getCycle();
+
 void smg_init();
-void smg_update(MenuState *menuState);
+void smg_update();
 void smg_render();
 
 void _smg_update_game();
-void _smg_update_end(MenuState *menuState);
+void _smg_update_end();
 void _smg_spawnMissile();
 void _smg_spawnMeteor();
 void _smg_destroyMeteor(int index);

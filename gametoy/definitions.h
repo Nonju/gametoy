@@ -1,7 +1,8 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-enum MenuState { MENU, HIGHSCORE, SPACEMETEORGAME, FLAPGAME };
+// No longer needed
+// enum MenuState { MENU, HIGHSCORE, SPACEMETEORGAME, FLAPGAME };
 
 typedef struct {
   int started;
@@ -18,9 +19,15 @@ typedef struct {
   int alive;
 } GameObject;
 
-/*typedef struct {*/
-/*  int last;*/
-/*  int current;*/
-/*} ScrollState;*/
+// TODO - Rename this into "ScreenCycle" or smth like that
+typedef void (*GameCycleInit)();
+typedef void (*GameCycleUpdate)();
+typedef void (*GameCycleRender)();
+typedef struct {
+  const char *name;
+  GameCycleInit init;
+  GameCycleUpdate update;
+  GameCycleRender render;
+} GameCycle;
 
 #endif

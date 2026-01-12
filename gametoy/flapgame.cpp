@@ -2,8 +2,16 @@
 #include "definitions.h"
 #include "display.h"
 #include "inputs.h"
+#include "screenstack.h"
 
 extern Adafruit_SSD1306 display;
+
+static GameCycle flap_cycle = {
+    "Flap game", // Name
+    flap_init,   // Init
+    flap_update, // Update
+    flap_render, // Render
+};
 
 Game flap_game = {1, 0, 3};
 GameObject flap_player = {FLAP_PLAYER_X,
@@ -17,6 +25,8 @@ FlapWallPair flap_walls[FLAP_WALL_MAX_AMOUNT];
 FlapWallPair *flap_lastWall = nullptr;
 
 int flap_timeSinceLastGravUpdate = 0;
+
+GameCycle *flap_getCycle() { return &flap_cycle; }
 
 void flap_init() {
   Serial.println("FLAP - Running init");
@@ -32,11 +42,11 @@ void flap_init() {
   flap_game.started = 1;
 }
 
-void flap_update(MenuState *menuState) {
+void flap_update() {
   if (flap_game.started == 1) {
     _flap_update_game();
   } else {
-    _flap_update_end(menuState);
+    _flap_update_end();
   }
 }
 
@@ -121,10 +131,12 @@ void _flap_update_game() {
   }
 }
 
-void _flap_update_end(MenuState *menuState) {
+void _flap_update_end() {
   if (inputs_btnPressed_A()) {
+    // REVIEW - Not sure this is required now that
+    //          screenstack_push also calls init
     flap_init(); // Reset game before returning
-    *menuState = MENU;
+    screenstack_pop();
   }
 }
 

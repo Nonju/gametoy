@@ -31,12 +31,14 @@ typedef struct {
   GameObject bottom;
 } FlapWallPair;
 
+GameCycle *flap_getCycle();
+
 void flap_init();
-void flap_update(MenuState *menuState);
+void flap_update();
 void flap_render();
 
 void _flap_update_game();
-void _flap_update_end(MenuState *menuState);
+void _flap_update_end();
 void _flap_spawnWall();
 void _flap_spawnWall(int xOverride);
 int _flap_wallIsAlive(FlapWallPair *wall);
